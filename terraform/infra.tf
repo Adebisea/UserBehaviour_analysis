@@ -33,12 +33,22 @@ resource "aws_redshiftserverless_namespace" "warehouse-namespace" {
   iam_roles = [module.redshift_iam.iam_role_arn]
 }
 
+#get subnet ids
+
+data "aws_subnets" "subnet_ids" {
+  filter {
+    name   = "vpc-id"
+    values = [var.vpc_id]
+  }
+}
+
+#create redshift serverless workgroup
 
 resource "aws_redshiftserverless_workgroup" "warehouse-workgroup" {
   namespace_name = aws_redshiftserverless_namespace.warehouse-namespace.id
   workgroup_name = "userbehavior-workgroup"
   base_capacity = "128"
-  subnet_ids = var.subnet_ids
+  subnet_ids = data.aws_subnets.subnet_ids.ids
   security_group_ids = var.security_group_ids
 }
 
