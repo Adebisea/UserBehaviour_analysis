@@ -24,3 +24,8 @@ variable "vpc_id" {
     type = string
     default = "vpc-072a65c15380540d9"
 }
+
+variable "email" {
+    type = string
+    default = "placeholder@gmail.com"
+}
