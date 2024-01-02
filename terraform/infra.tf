@@ -18,7 +18,7 @@ resource "aws_s3_bucket" "create-lake" {
 }
 
 #Reference iam_roles from permissions
-module "redshift_iam" {
+module "iam_perms" {
   source = "./permissions"  
 }
 
@@ -30,7 +30,7 @@ resource "aws_redshiftserverless_namespace" "warehouse-namespace" {
   admin_user_password = var.admin_password
   admin_username = var.admin_username
   db_name = var.db_name
-  iam_roles = [module.redshift_iam.iam_role_arn]
+  iam_roles = [module.iam_perms.iam_role_arn]
 }
 
 #get subnet ids
@@ -45,11 +45,11 @@ data "aws_subnets" "subnet_ids" {
 #create redshift serverless workgroup
 
 resource "aws_redshiftserverless_workgroup" "warehouse-workgroup" {
-  namespace_name = aws_redshiftserverless_namespace.warehouse-namespace.id
-  workgroup_name = "userbehavior-workgroup"
-  base_capacity = "128"
-  subnet_ids = data.aws_subnets.subnet_ids.ids
-  security_group_ids = var.security_group_ids
+  namespace_name      = aws_redshiftserverless_namespace.warehouse-namespace.id
+  workgroup_name      = "userbehavior-workgroup"
+  base_capacity       = "128"
+  subnet_ids          = data.aws_subnets.subnet_ids.ids
+  security_group_ids  = var.security_group_ids
 }
 
 
@@ -97,20 +97,13 @@ resource "aws_budgets_budget" "userbehavior" {
 
 #Create ec2 instance
 
-data "aws_ami" "example" {
-  executable_users = ["self"]
+data "aws_ami" "ubuntu" {
   most_recent      = true
-  name_regex       = "^myami-\\d{3}"
   owners           = ["amazon"]
 
   filter {
     name   = "name"
-    values = ["myami-*"]
-  }
-
-  filter {
-    name   = "root-device-type"
-    values = ["ebs"]
+    values = ["ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-20220420"]
   }
 
   filter {
@@ -118,3 +111,22 @@ data "aws_ami" "example" {
     values = ["hvm"]
   }
 }
+
+resource "tls_private_key" "tls_gen_key" {
+  algorithm = "RSA"
+  rsa_bits  = 4096
+}
+
+resource "aws_key_pair" "ec2_keypair" {
+  key_name_prefix = var.keypair_name
+  public_key      = tls_private_key.tls_gen_key.public_key_openssh
+}
+
+resource "aws_instance" "ec2_userbehavior" {
+  ami           = data.aws_ami.ubuntu.id
+  instance_type = var.instance_type
+  key_name = aws_key_pair.ec2_keypair.key_name
+  vpc_security_group_ids = [module.iam_perms.allow_ssh_secgroup_name]
+  iam_instance_profile = module.iam_perms.ec2_iam_profile
+}
+
