@@ -1,3 +1,5 @@
+
+# IAM role for redshift access to s3
 resource "aws_iam_policy" "redshift-lake-policy" {
     name = "redshiftS3_policy"
     description = "Policy for redshift serverless to access s3"
@@ -46,3 +48,34 @@ resource "aws_iam_role_policy_attachment" "redshift-lake-role-policy-attach" {
     role       = aws_iam_role.redshift-lake-role.name
     policy_arn = aws_iam_policy.redshift-lake-policy.arn
     }
+
+
+#Security group for ec2 to allow ssh traffic
+
+resource "aws_security_group" "allow_ssh" {
+  name        = "allow_ssh"
+  description = "Allow SSH inbound traffic"
+  vpc_id      = var.vpc_id
+
+  ingress {
+    from_port        = 22
+    to_port          = 22
+    protocol         = "tcp"
+    cidr_blocks      = [var.vpc_cidr_block]
+  }
+    egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = [var.vpc_cidr_block]
+  }
+
+  egress {
+    from_port   = 8080
+    to_port     = 8080
+    protocol    = "tcp"
+    cidr_blocks = [var.vpc_cidr_block]
+  }
+
+}
+
