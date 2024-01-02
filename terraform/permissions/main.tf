@@ -79,3 +79,31 @@ resource "aws_security_group" "allow_ssh" {
 
 }
 
+#IAM Role for ec2 to access S3, EMR & Redshift
+
+resource "aws_iam_role" "ec2_userbehavior_role" {
+    name = "ec2_userbehavior_role"
+
+    assume_role_policy = jsonencode({
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+                "Effect": "Allow",
+                "Action": [
+                    "sts:AssumeRole"
+                ],
+                "Principal": {
+                    "Service": [
+                        "ec2.amazonaws.com"
+                    ]
+                }
+            }
+        ]
+    }) 
+    managed_policy_arns = ["arn:aws:iam::aws:policy/AmazonS3FullAccess","arn:aws:iam::aws:policy/AmazonRedshiftAllCommandsFullAccess","arn:aws:iam::aws:policy/AmazonEMRFullAccessPolicy_v2"]
+    }
+
+resource "aws_iam_instance_profile" "ec2-userbehavior_iam_profile" {
+  name = "ec2-userbehavior_iam_profile"
+  role = aws_iam_role.ec2_userbehavior_role.name
+}
