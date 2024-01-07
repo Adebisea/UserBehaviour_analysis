@@ -1,6 +1,6 @@
 ---
 - name: Install dependencies
-  hosts: host
+  hosts: aws
   remote_user: ubuntu
   roles: 
     - dependencies

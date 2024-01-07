@@ -71,7 +71,7 @@ data "aws_ami" "ubuntu" {
 }
 
 data "aws_key_pair" "test_keypair" {
-  key_name           = "userbehav"
+  key_name           = "userbehav1"
 }
 
 
