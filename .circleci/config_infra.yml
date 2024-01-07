@@ -56,6 +56,23 @@ jobs:
             terraform apply --auto-approve
       - destroy-infra
 
+  host-ip:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - checkout
+      - run:
+          name: Add ec2 instance ip to ansible inventory
+          command: |
+            cd .circleci/ansible
+            aws ec2 describe-instances \
+              --query 'Reservations[*].Instances[*].PublicIpAddress' \
+              --filters "Name=tag:project,Values=userbehav" \
+              --output text >> inventory.ini
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - project/.circleci/ansible/inventory.ini
             
   install-dependencies:
     docker:
@@ -65,13 +82,14 @@ jobs:
       - add_ssh_keys:
           fingerprints:
             - "68:76:44:46:94:dd:75:49:44:9e:74:24:d8:39:11:1e"
-
+      - attach_workspace:
+          at: ~/
       - install-ansible
       - run:
           name: install dependencies
           command: |
             cd .circleci/ansible
-            ansible-playbook -i inventory.txt playbook.yml
+            ansible-playbook -i inventory.ini playbook.yml
 
 
 
@@ -81,6 +99,8 @@ workflows:
       - configure-infrastructure-plan
       - configure-infrastructure-apply:
           requires: [configure-infrastructure-plan]
-      - install-dependencies:
+      - host-ip:
           requires: [configure-infrastructure-apply]
+      - install-dependencies:
+          requires: [host-ip]
   
