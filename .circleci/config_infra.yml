@@ -57,6 +57,23 @@ jobs:
       - destroy-infra
 
             
+  install-dependencies:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - checkout
+      - add_ssh_keys:
+          fingerprints:
+            - "68:76:44:46:94:dd:75:49:44:9e:74:24:d8:39:11:1e"
+
+      - install-ansible
+      - run:
+          name: install dependencies
+          command: |
+            cd .circleci/ansible
+            ansible-playbook -i inventory.txt playbook.yml
+
+
 
 
   
