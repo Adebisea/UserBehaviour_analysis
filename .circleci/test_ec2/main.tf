@@ -80,5 +80,9 @@ resource "aws_instance" "ec2_userbehavior" {
   instance_type          = var.instance_type
   key_name               = data.aws_key_pair.test_keypair.key_name
   vpc_security_group_ids = [aws_security_group.allow_ssh.id]
+  tags = {
+    "key" = "project"
+    "values" = "userbehav"
+  }
 }
 
