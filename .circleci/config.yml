@@ -94,7 +94,7 @@ jobs:
           name: install dependencies
           command: |
             cd .circleci/ansible
-            ansible-playbook -i inventory.ini playbook.yml
+            ansible-playbook -i inventory.ini playbook.yaml
 
 
 
