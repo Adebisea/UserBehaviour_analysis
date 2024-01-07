@@ -1,0 +1,6 @@
+---
+- name: Install dependencies
+  hosts: all
+  remote_user: ubuntu
+  roles: 
+    - dependencies
