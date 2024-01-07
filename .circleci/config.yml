@@ -52,9 +52,10 @@ jobs:
       - run:
           name: Configure infrastructure
           command: |
-            cd .circleci/test_ec2         
+            cd .circleci/test_ec2  
+            terraform init       
             terraform apply --auto-approve
-      - destroy-infra
+
 
   host-ip:
     docker:
