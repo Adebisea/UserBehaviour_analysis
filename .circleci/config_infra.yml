@@ -75,5 +75,12 @@ jobs:
 
 
 
-
+workflows:
+  default:
+    jobs:
+      - configure-infrastructure-plan
+      - configure-infrastructure-apply:
+          requires: [configure-infrastructure-plan]
+      - install-dependencies:
+          requires: [configure-infrastructure-apply]
   
