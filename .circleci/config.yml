@@ -8,7 +8,6 @@ commands:
           name: Destroy environments
           when: on_fail
           command: |
-            cd circleci/test_ec2
             terraform destroy --auto-approve
 
   install-ansible:
@@ -55,6 +54,7 @@ jobs:
             cd .circleci/test_ec2  
             terraform init       
             terraform apply --auto-approve
+      - destroy-infra
 
 
   host-ip:
