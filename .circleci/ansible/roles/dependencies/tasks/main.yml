@@ -29,7 +29,7 @@
   become: yes
   shell: |
     curl -LfO 'https://airflow.apache.org/docs/apache-airflow/2.8.0/docker-compose.yaml'
-    mkdir -p workflow/dags workflow/logs workflow/plugins workflow/config
+    mkdir -p wo/dags workflow/logs workflow/plugins workflow/config
     echo -e "AIRFLOW_UID=$(id -u)" > .env
     sudo docker compose up airflow-init
     sudo docker compose up
