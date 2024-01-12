@@ -20,45 +20,53 @@
     sudo chmod +x /usr/local/bin/docker-compose
     docker-compose --version
 
-# - name: Download airflow docker compose file
-#   get_url:
-#     url: https://airflow.apache.org/docs/apache-airflow/2.8.0/docker-compose.yaml
-#     dest: ~
 
-- name: download airflow docker compose file
+- name: checkout github repo
+  get_url:
+    url: https://github.com/Adebisea/UserBehaviour_analysis.git
+    dest: /home/ubuntu
+
+- name: postgres and pg services
   become: yes
   shell: |
-    curl -LfO 'https://airflow.apache.org/docs/apache-airflow/2.8.0/docker-compose.yaml'
-    mkdir -p wo/dags workflow/logs workflow/plugins workflow/config
-    echo -e "AIRFLOW_UID=$(id -u)" > .env
-    sudo docker compose up airflow-init
-    sudo docker compose up
+    docker-compose --file ../files/docker_compose_pg.yml
+
+
+
+# - name: download airflow docker compose file
+#   become: yes
+#   shell: |
+#     curl -LfO 'https://airflow.apache.org/docs/apache-airflow/2.8.0/docker-compose.yaml'
+#     mkdir -p workflow/dags workflow/logs workflow/plugins workflow/config
+#     echo -e "AIRFLOW_UID=$(id -u)" > .env
+#     sudo docker-compose up airflow-init
+#     sudo docker-compose up
     
-- name: postgres and pg services
-  docker_compose:
-    project_name: db
-    definition:
-      services:
-        pgdatabase:
-          image: postgres:13
-          environment: 
-            - POSTGRES_USER=admin
-            - POSTGRES_PASSWORD=admin_password
-            - POSTGRES_DB=newyork_taxi
-          # volumes:
-          ports:
-            - "5432:5432"
+# - name: postgres and pg services
+#   docker_compose:
+#     project_name: db
+#     definition:
+#       services:
+#         pgdatabase:
+#           image: postgres:13
+#           environment: 
+#             - POSTGRES_USER=admin
+#             - POSTGRES_PASSWORD=admin_password
+#             - POSTGRES_DB=newyork_taxi
+#           # volumes:
+#           ports:
+#             - "5432:5432"
 
-        pgadmin:
-          image: dpage/pgadmin4
-          environment:
-            - PGADMIN_DEFAULT_EMAIL=admin@admin.com
-            - PGADMIN_DEFAULT_PASSWORD=admin_password
-          ports:
-            - "8090:80"
+#         pgadmin:
+#           image: dpage/pgadmin4
+#           environment:
+#             - PGADMIN_DEFAULT_EMAIL=admin@admin.com
+#             - PGADMIN_DEFAULT_PASSWORD=admin_password
+#           ports:
+#             - "8090:80"
 
-- name: Create and start services
-  docker_compose:
-    project_src: db
-  register: output
+# - name: Create and start services
+#   docker_compose:
+#     project_src: db
+#   register: output
   
